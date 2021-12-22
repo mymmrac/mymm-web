@@ -1,8 +1,10 @@
 # IDE 
-.idea
+.idea/
 
 # JS
 .DS_Store
-node_modules
-dist
+node_modules/
+dist/
 
+# Binaries
+bin/
