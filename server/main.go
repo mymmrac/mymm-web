@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -12,16 +13,49 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/shirou/gopsutil/v3/cpu"
+	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/sirupsen/logrus"
 )
 
-func cpuHandler(w http.ResponseWriter, _ *http.Request) {
+const cpuReadDuration = time.Second
+
+type system struct {
+	log *logrus.Logger
+}
+
+func respondJSON(w http.ResponseWriter, log *logrus.Logger, v interface{}) {
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(v); err != nil {
+		log.Errorf("Write: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
+func (s *system) cpuHandler(w http.ResponseWriter, _ *http.Request) {
+	load, err := cpu.Percent(cpuReadDuration, true)
+	if err != nil {
+		s.log.Errorf("Read CPU: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	respondJSON(w, s.log, load)
+}
+
+func (s *system) ramHandler(w http.ResponseWriter, _ *http.Request) {
+	ram, err := mem.VirtualMemory()
+	if err != nil {
+		s.log.Errorf("Read RAM: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	respondJSON(w, s.log, ram)
 }
 
 const addr = "127.0.0.1:8080"
-
-const shutdownTimeout = 10 * time.Second
 
 func main() {
 	log := logrus.New()
@@ -43,8 +77,11 @@ func main() {
 		}
 	})
 
+	systemHandler := system{log: log}
+
 	sys := r.PathPrefix("/system").Subrouter()
-	sys.HandleFunc("/cpu", cpuHandler)
+	sys.HandleFunc("/cpu", systemHandler.cpuHandler)
+	sys.HandleFunc("/ram", systemHandler.ramHandler)
 
 	srv := &http.Server{
 		Handler:      r,
@@ -68,7 +105,7 @@ func main() {
 
 	log.Info("Shutting down...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {
