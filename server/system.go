@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/shirou/gopsutil/v3/load"
 	"time"
 
 	"github.com/kataras/iris/v12"
@@ -18,7 +19,7 @@ type cpuStats struct {
 }
 
 func cpuHandler(ctx *context.Context) {
-	load, err := cpu.Percent(cpuReadDuration, true)
+	cores, err := cpu.Percent(cpuReadDuration, true)
 	if err != nil {
 		ctx.StopWithProblem(iris.StatusInternalServerError, iris.NewProblem().
 			Title("Reading CPU").DetailErr(err))
@@ -26,7 +27,7 @@ func cpuHandler(ctx *context.Context) {
 	}
 
 	_, _ = ctx.JSON(cpuStats{
-		Cores: load,
+		Cores: cores,
 	})
 }
 
@@ -85,7 +86,7 @@ type diskStats struct {
 }
 
 func diskHandler(ctx *context.Context) {
-	diskUsg, err := disk.Usage("/")
+	diskUsage, err := disk.Usage("/")
 	if err != nil {
 		ctx.StopWithProblem(iris.StatusInternalServerError, iris.NewProblem().
 			Title("Reading disk").DetailErr(err))
@@ -93,11 +94,11 @@ func diskHandler(ctx *context.Context) {
 	}
 
 	_, _ = ctx.JSON(diskStats{
-		Path:        diskUsg.Path,
-		Total:       diskUsg.Total,
-		Free:        diskUsg.Free,
-		Used:        diskUsg.Used,
-		UsedPercent: diskUsg.UsedPercent,
+		Path:        diskUsage.Path,
+		Total:       diskUsage.Total,
+		Free:        diskUsage.Free,
+		Used:        diskUsage.Used,
+		UsedPercent: diskUsage.UsedPercent,
 	})
 }
 
@@ -124,5 +125,26 @@ func uptimeHandler(ctx *context.Context) {
 	_, _ = ctx.JSON(uptimeStats{
 		BootTime: bootTime,
 		Uptime:   uptime,
+	})
+}
+
+type loadStats struct {
+	Load1  float64 `json:"load1"`
+	Load5  float64 `json:"load5"`
+	Load15 float64 `json:"load15"`
+}
+
+func loadHandler(ctx *context.Context) {
+	avgLoad, err := load.Avg()
+	if err != nil {
+		ctx.StopWithProblem(iris.StatusInternalServerError, iris.NewProblem().
+			Title("Reading disk").DetailErr(err))
+		return
+	}
+
+	_, _ = ctx.JSON(loadStats{
+		Load1:  avgLoad.Load1,
+		Load5:  avgLoad.Load5,
+		Load15: avgLoad.Load15,
 	})
 }
