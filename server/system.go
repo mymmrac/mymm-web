@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/shirou/gopsutil/v3/load"
 	"time"
 
 	"github.com/kataras/iris/v12"
@@ -9,6 +8,7 @@ import (
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/shirou/gopsutil/v3/host"
+	"github.com/shirou/gopsutil/v3/load"
 	"github.com/shirou/gopsutil/v3/mem"
 )
 
