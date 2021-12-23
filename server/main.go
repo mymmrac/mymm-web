@@ -1,6 +1,7 @@
 package main
 
 import (
+	stdContext "context"
 	"time"
 
 	"github.com/kataras/iris/v12"
@@ -42,5 +43,16 @@ func main() {
 		_, _ = ctx.JSON(ram)
 	})
 
-	_ = app.Listen(addr)
+	idleConnectionsClosed := make(chan struct{})
+	iris.RegisterOnInterrupt(func() {
+		timeout := 10 * time.Second
+		ctx, cancel := stdContext.WithTimeout(stdContext.Background(), timeout)
+		defer cancel()
+
+		_ = app.Shutdown(ctx)
+		close(idleConnectionsClosed)
+	})
+
+	_ = app.Listen(addr, iris.WithoutInterruptHandler, iris.WithoutServerError(iris.ErrServerClosed))
+	<-idleConnectionsClosed
 }
