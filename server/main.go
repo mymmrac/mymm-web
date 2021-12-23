@@ -21,6 +21,7 @@ func main() {
 	systemAPI.Get("/ram", ramHandler)
 	systemAPI.Get("/swap", swapHandler)
 	systemAPI.Get("/disk", diskHandler)
+	systemAPI.Get("/uptime", uptimeHandler)
 
 	idleConnectionsClosed := make(chan struct{})
 	iris.RegisterOnInterrupt(func() {
