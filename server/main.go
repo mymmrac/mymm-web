@@ -2,9 +2,11 @@ package main
 
 import (
 	stdContext "context"
+	"flag"
 	"math/rand"
 	"time"
 
+	"github.com/iris-contrib/middleware/cors"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 )
@@ -18,9 +20,19 @@ type healthStats struct {
 	Random  int  `json:"random"`
 }
 
+var localRun = flag.Bool("local", false, "Local run")
+
 func main() {
 	app := iris.New()
 	app.Logger().TimeFormat = logTimeFormat
+
+	flag.Parse()
+	if *localRun {
+		crs := cors.New(cors.Options{
+			AllowedOrigins: []string{"*"},
+		})
+		app.UseRouter(crs)
+	}
 
 	app.Get("/", func(ctx *context.Context) {
 		_, _ = ctx.JSON(healthStats{

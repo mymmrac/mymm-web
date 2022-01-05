@@ -3,6 +3,7 @@ module mymm
 go 1.17
 
 require (
+	github.com/iris-contrib/middleware/cors v0.0.0-20211207164801-081c558a02bb
 	github.com/kataras/iris/v12 v12.2.0-alpha5.0.20211218011636-25ad31be505a
 	github.com/shirou/gopsutil/v3 v3.21.11
 )
@@ -56,6 +57,5 @@ require (
 	golang.org/x/time v0.0.0-20211116232009-f0f3c7e86c11 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
