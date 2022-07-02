@@ -13,4 +13,5 @@ host = "localhost:27017"
 timeout = "10s"
 
 [settings]
+usersFilename = "users.yml"
 cpuReadDuration = "1s"

@@ -9,6 +9,7 @@ import (
 
 	"github.com/iris-contrib/middleware/cors"
 	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/middleware/basicauth"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -70,7 +71,14 @@ func main() {
 	}
 	// ==== MongoDB End ====
 
-	handler, err := handlerPkg.NewHandler(app, cfg, log, mongoClient)
+	// ==== Auth ====
+	auth, err := common.SafeBasicAuthLoad(cfg.Settings.UsersFilename, basicauth.BCRYPT)
+	if err != nil {
+		exitWithError(err)
+	}
+	// ==== Auth End ====
+
+	handler, err := handlerPkg.NewHandler(app, auth, cfg, log, mongoClient)
 	if err != nil {
 		exitWithError(err)
 	}

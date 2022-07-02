@@ -50,6 +50,7 @@ type MongoDB struct {
 }
 
 type Settings struct {
+	UsersFilename   string
 	CPUReadDuration TextDuration
 }
 

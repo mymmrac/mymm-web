@@ -14,24 +14,26 @@ import (
 )
 
 type Handler struct {
-	app *iris.Application
-	log logger.Logger
+	app  *iris.Application
+	auth context.Handler
+	log  logger.Logger
 
 	health    model.Health
 	system    model.System
 	bookmarks model.Bookmarks
 }
 
-func NewHandler(app *iris.Application, cfg config.Config, log logger.Logger, mongoClient *mongo.Client) (*Handler,
-	error) {
+func NewHandler(app *iris.Application, auth context.Handler, cfg config.Config, log logger.Logger,
+	mongoClient *mongo.Client) (*Handler, error) {
 	health, err := model.NewHealth()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create health model: %w", err)
 	}
 
 	return &Handler{
-		app: app,
-		log: log,
+		app:  app,
+		auth: auth,
+		log:  log,
 
 		health:    health,
 		system:    model.NewSystem(cfg),
@@ -44,7 +46,7 @@ func (h *Handler) RegisterRoutes() {
 
 	h.app.Get("/", h.healthHandler)
 
-	systemAPI := h.app.Party("/system")
+	systemAPI := h.app.Party("/system", h.auth)
 	systemAPI.Get("/", h.systemAllHandler)
 	systemAPI.Get("/cpu", h.cpuHandler)
 	systemAPI.Get("/load", h.loadHandler)
@@ -55,16 +57,19 @@ func (h *Handler) RegisterRoutes() {
 
 	bookmarksAPI := h.app.Party("/bookmarks")
 	bookmarksAPI.Get("/", h.bookmarksHandler)
-	bookmarksAPI.Post("/", h.bookmarksAddHandler)
-	bookmarksAPI.Put("/", h.bookmarksUpdateHandler)
-	bookmarksAPI.Delete("/", h.bookmarksDeleteHandler)
+	bookmarksAPI.Post("/", h.auth, h.bookmarksAddHandler)
+	bookmarksAPI.Put("/", h.auth, h.bookmarksUpdateHandler)
+	bookmarksAPI.Delete("/", h.auth, h.bookmarksDeleteHandler)
 }
 
 func (h *Handler) handleErrors() {
+	h.app.OnErrorCode(iris.StatusUnauthorized, func(ctx *context.Context) {
+		common.ReturnErrorTextWithStatus(ctx, iris.StatusUnauthorized, "401 Unauthorized")
+	})
 	h.app.OnErrorCode(iris.StatusNotFound, func(ctx *context.Context) {
-		common.ReturnErrorText(ctx, "404 Not Found")
+		common.ReturnErrorTextWithStatus(ctx, iris.StatusNotFound, "404 Not Found")
 	})
 	h.app.OnErrorCode(iris.StatusInternalServerError, func(ctx *context.Context) {
-		common.ReturnErrorText(ctx, "500 Internal Server Error")
+		common.ReturnErrorTextWithStatus(ctx, iris.StatusInternalServerError, "500 Internal Server Error")
 	})
 }
