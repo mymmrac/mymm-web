@@ -1,4 +1,4 @@
-module mymm
+module github.com/mymmrac/mymm.gq/server
 
 go 1.18
 

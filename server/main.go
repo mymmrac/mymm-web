@@ -3,35 +3,44 @@ package main
 import (
 	stdContext "context"
 	"flag"
+	"fmt"
 	"math/rand"
+	"os"
 	"time"
 
 	"github.com/iris-contrib/middleware/cors"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
+
+	"github.com/mymmrac/mymm.gq/server/config"
+	"github.com/mymmrac/mymm.gq/server/logger"
 )
-
-const addr = "127.0.0.1:8080"
-
-const logTimeFormat = "02.01.2006 15:04"
 
 type healthStats struct {
 	Running bool `json:"running"`
 	Random  int  `json:"random"`
 }
 
-var localRun = flag.Bool("local", false, "Local run")
+var configFile = flag.String("config", "", "Config file")
 
 func main() {
-	app := iris.New()
-	app.Logger().TimeFormat = logTimeFormat
+	fmt.Println("Starting server...")
 
 	flag.Parse()
-	if *localRun {
-		crs := cors.New(cors.Options{
-			AllowedOrigins: []string{"*"},
-		})
-		app.UseRouter(crs)
+	cfg, err := config.LoadConfig(*configFile)
+	if err != nil {
+		exitWithError(err)
+	}
+
+	app := iris.New()
+
+	log := logger.NewLog(app.Logger())
+	if err = cfg.ConfigureLogger(log); err != nil {
+		exitWithError(err)
+	}
+
+	if cfg.CORSAllowAll {
+		app.UseRouter(cors.AllowAll())
 	}
 
 	app.Get("/", func(ctx *context.Context) {
@@ -60,6 +69,11 @@ func main() {
 		close(idleConnectionsClosed)
 	})
 
-	_ = app.Listen(addr, iris.WithoutInterruptHandler, iris.WithoutServerError(iris.ErrServerClosed))
+	_ = app.Listen(":"+cfg.Port, iris.WithoutInterruptHandler, iris.WithoutServerError(iris.ErrServerClosed))
 	<-idleConnectionsClosed
+}
+
+func exitWithError(err error) {
+	_, _ = fmt.Fprintf(os.Stderr, "FATAL: %s", err)
+	os.Exit(1)
 }
