@@ -1,11 +1,16 @@
-port = "8080"
-corsAllowAll = true
-
-mongoDBHost = "localhost:27017"
-
-cpuReadDuration = "1s"
-
 [log]
 level = "debug"
 destination = "stdout"
 filename = "server.log"
+
+[infrastructure.httpServer]
+port = "8080"
+corsAllowAll = true
+timeout = "10s"
+
+[infrastructure.mongoDB]
+host = "localhost:27017"
+timeout = "10s"
+
+[settings]
+cpuReadDuration = "1s"

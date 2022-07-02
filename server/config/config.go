@@ -22,17 +22,35 @@ func LoadConfig(filename string) (Config, error) {
 }
 
 type Config struct {
-	Log             Log
-	Port            string
-	CORSAllowAll    bool
-	MongoDBHost     string
-	CPUReadDuration TextDuration
+	Log            Log
+	Infrastructure Infrastructure
+	Settings       Settings
 }
 
 type Log struct {
 	Level       string
 	Destination string
 	Filename    string
+}
+
+type Infrastructure struct {
+	HTTPServer HTTPServer
+	MongoDB    MongoDB
+}
+
+type HTTPServer struct {
+	Port         string
+	Timeout      TextDuration
+	CORSAllowAll bool
+}
+
+type MongoDB struct {
+	Host    string
+	Timeout TextDuration
+}
+
+type Settings struct {
+	CPUReadDuration TextDuration
 }
 
 const (

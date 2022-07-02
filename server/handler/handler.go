@@ -22,7 +22,8 @@ type Handler struct {
 	bookmarks model.Bookmarks
 }
 
-func NewHandler(app *iris.Application, cfg config.Config, log logger.Logger, dbClient *mongo.Client) (*Handler, error) {
+func NewHandler(app *iris.Application, cfg config.Config, log logger.Logger, mongoClient *mongo.Client) (*Handler,
+	error) {
 	health, err := model.NewHealth()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create health model: %w", err)
@@ -34,7 +35,7 @@ func NewHandler(app *iris.Application, cfg config.Config, log logger.Logger, dbC
 
 		health:    health,
 		system:    model.NewSystem(cfg),
-		bookmarks: model.NewBookmarks(dbClient),
+		bookmarks: model.NewBookmarks(mongoClient),
 	}, nil
 }
 

@@ -79,7 +79,7 @@ type SystemImpl struct {
 
 func NewSystem(cfg config.Config) *SystemImpl {
 	return &SystemImpl{
-		cpuReadDuration: cfg.CPUReadDuration.Duration,
+		cpuReadDuration: cfg.Settings.CPUReadDuration.Duration,
 	}
 }
 

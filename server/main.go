@@ -24,14 +24,21 @@ var configFile = flag.String("config", "", "Config file")
 func main() {
 	fmt.Println("Starting server...")
 
+	app := iris.New()
+
+	// ==== Config ====
 	flag.Parse()
 	cfg, err := config.LoadConfig(*configFile)
 	if err != nil {
 		exitWithError(err)
 	}
 
-	app := iris.New()
+	if cfg.Infrastructure.HTTPServer.CORSAllowAll {
+		app.UseRouter(cors.AllowAll())
+	}
+	// ==== Config End ====
 
+	// ==== Logger ====
 	log := logger.NewLog(app.Logger())
 	if err = cfg.ConfigureLogger(log); err != nil {
 		exitWithError(err)
@@ -45,26 +52,25 @@ func main() {
 	if cfg.Log.Level != config.LogLevelDebug {
 		app.Configure(iris.WithoutStartupLog)
 	}
+	// ==== Logger End ====
 
-	if cfg.CORSAllowAll {
-		app.UseRouter(cors.AllowAll())
-	}
-
+	// ==== MongoDB ====
 	mongoCtx, mongoCancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer mongoCancel()
-	client, err := mongo.Connect(mongoCtx, options.Client().
+	mongoClient, err := mongo.Connect(mongoCtx, options.Client().
 		SetRegistry(common.MongoRegistry).
-		ApplyURI("mongodb://"+cfg.MongoDBHost))
+		ApplyURI("mongodb://"+cfg.Infrastructure.MongoDB.Host))
 	defer func() {
-		if err = client.Disconnect(mongoCtx); err != nil {
+		if err = mongoClient.Disconnect(mongoCtx); err != nil {
 			exitWithError(err)
 		}
 	}()
-	if err = client.Ping(mongoCtx, readpref.Primary()); err != nil {
+	if err = mongoClient.Ping(mongoCtx, readpref.Primary()); err != nil {
 		exitWithError(err)
 	}
+	// ==== MongoDB End ====
 
-	handler, err := handlerPkg.NewHandler(app, cfg, log, client)
+	handler, err := handlerPkg.NewHandler(app, cfg, log, mongoClient)
 	if err != nil {
 		exitWithError(err)
 	}
@@ -73,8 +79,7 @@ func main() {
 
 	idleConnectionsClosed := make(chan struct{})
 	iris.RegisterOnInterrupt(func() {
-		timeout := 10 * time.Second
-		irisCtx, irisCancel := context.WithTimeout(context.Background(), timeout)
+		irisCtx, irisCancel := context.WithTimeout(context.Background(), cfg.Infrastructure.HTTPServer.Timeout.Duration)
 		defer irisCancel()
 
 		_ = app.Shutdown(irisCtx)
@@ -82,7 +87,8 @@ func main() {
 	})
 
 	fmt.Println("Listening...")
-	_ = app.Listen("localhost:"+cfg.Port, iris.WithoutInterruptHandler, iris.WithoutServerError(iris.ErrServerClosed))
+	_ = app.Listen("localhost:"+cfg.Infrastructure.HTTPServer.Port, iris.WithoutInterruptHandler,
+		iris.WithoutServerError(iris.ErrServerClosed))
 	<-idleConnectionsClosed
 
 	fmt.Println("Done")
