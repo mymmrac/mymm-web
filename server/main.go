@@ -1,25 +1,17 @@
 package main
 
 import (
-	stdContext "context"
+	"context"
 	"flag"
 	"fmt"
-	"math/rand"
 	"os"
 	"time"
 
 	"github.com/iris-contrib/middleware/cors"
 	"github.com/kataras/iris/v12"
-	"github.com/kataras/iris/v12/context"
-
 	"github.com/mymmrac/mymm.gq/server/config"
 	"github.com/mymmrac/mymm.gq/server/logger"
 )
-
-type healthStats struct {
-	Running bool `json:"running"`
-	Random  int  `json:"random"`
-}
 
 var configFile = flag.String("config", "", "Config file")
 
@@ -52,26 +44,12 @@ func main() {
 		app.UseRouter(cors.AllowAll())
 	}
 
-	app.Get("/", func(ctx *context.Context) {
-		_, _ = ctx.JSON(healthStats{
-			Running: true,
-			Random:  rand.Int(),
-		})
-	})
-
-	systemAPI := app.Party("/system")
-
-	systemAPI.Get("/cpu", cpuHandler)
-	systemAPI.Get("/ram", ramHandler)
-	systemAPI.Get("/swap", swapHandler)
-	systemAPI.Get("/disk", diskHandler)
-	systemAPI.Get("/uptime", uptimeHandler)
-	systemAPI.Get("/load", loadHandler)
+	registerRoutes(app)
 
 	idleConnectionsClosed := make(chan struct{})
 	iris.RegisterOnInterrupt(func() {
 		timeout := 10 * time.Second
-		ctx, cancel := stdContext.WithTimeout(stdContext.Background(), timeout)
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
 
 		_ = app.Shutdown(ctx)
