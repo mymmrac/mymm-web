@@ -2,9 +2,15 @@
 .idea/
 
 # JS
-.DS_Store
 node_modules/
 dist/
 
 # Binaries
 bin/
+
+# Logs
+*.log
+
+# Other
+.DS_Store
+
