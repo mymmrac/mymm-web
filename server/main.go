@@ -11,6 +11,7 @@ import (
 	"github.com/kataras/iris/v12"
 
 	"github.com/mymmrac/mymm.gq/server/config"
+	handlerPkg "github.com/mymmrac/mymm.gq/server/handler"
 	"github.com/mymmrac/mymm.gq/server/logger"
 )
 
@@ -45,7 +46,7 @@ func main() {
 		app.UseRouter(cors.AllowAll())
 	}
 
-	handler, err := NewHandler(app, cfg, log)
+	handler, err := handlerPkg.NewHandler(app, cfg, log)
 	if err != nil {
 		exitWithError(err)
 	}
