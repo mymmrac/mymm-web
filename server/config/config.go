@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/BurntSushi/toml"
+
 	"github.com/mymmrac/mymm.gq/server/logger"
 )
 

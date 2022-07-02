@@ -9,6 +9,7 @@ import (
 
 	"github.com/iris-contrib/middleware/cors"
 	"github.com/kataras/iris/v12"
+
 	"github.com/mymmrac/mymm.gq/server/config"
 	"github.com/mymmrac/mymm.gq/server/logger"
 )
@@ -44,7 +45,12 @@ func main() {
 		app.UseRouter(cors.AllowAll())
 	}
 
-	registerRoutes(app)
+	handler, err := NewHandler(app, cfg, log)
+	if err != nil {
+		exitWithError(err)
+	}
+
+	handler.RegisterRoutes()
 
 	idleConnectionsClosed := make(chan struct{})
 	iris.RegisterOnInterrupt(func() {
