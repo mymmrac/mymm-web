@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/shirou/gopsutil/v3/cpu"
@@ -9,9 +10,12 @@ import (
 	"github.com/shirou/gopsutil/v3/host"
 	"github.com/shirou/gopsutil/v3/load"
 	"github.com/shirou/gopsutil/v3/mem"
+
+	"github.com/mymmrac/mymm.gq/server/common"
+	"github.com/mymmrac/mymm.gq/server/config"
 )
 
-type CpuStats struct {
+type CPUStats struct {
 	Cores []float64 `json:"cores"`
 }
 
@@ -21,7 +25,7 @@ type LoadStats struct {
 	Load15 float64 `json:"load15"`
 }
 
-type RamStats struct {
+type RAMStats struct {
 	Total       uint64  `json:"total"`
 	Free        uint64  `json:"free"`
 	Used        uint64  `json:"used"`
@@ -49,30 +53,65 @@ type DiskStats struct {
 	UsedPercent float64 `json:"usedPercent"`
 }
 
+type SystemStats struct {
+	CPU    *CPUStats    `json:"cpu,omitempty"`
+	Load   *LoadStats   `json:"load,omitempty"`
+	RAM    *RAMStats    `json:"ram,omitempty"`
+	Swap   *SwapStats   `json:"swap,omitempty"`
+	Uptime *UptimeStats `json:"uptime,omitempty"`
+	Disk   *DiskStats   `json:"disk,omitempty"`
+}
+
 type System interface {
-	CPU() (*CpuStats, error)
+	All() (*SystemStats, error)
+
+	CPU() (*CPUStats, error)
 	Load() (*LoadStats, error)
-	RAM() (*RamStats, error)
+	RAM() (*RAMStats, error)
 	Swap() (*SwapStats, error)
 	Uptime() (*UptimeStats, error)
 	Disk() (*DiskStats, error)
 }
 
-type SystemImpl struct{}
-
-func NewSystem() *SystemImpl {
-	return &SystemImpl{}
+type SystemImpl struct {
+	cpuReadDuration time.Duration
 }
 
-const cpuReadDuration = 1 * time.Second
+func NewSystem(cfg config.Config) *SystemImpl {
+	return &SystemImpl{
+		cpuReadDuration: cfg.CPUReadDuration.Duration,
+	}
+}
 
-func (s *SystemImpl) CPU() (*CpuStats, error) {
-	cores, err := cpu.Percent(cpuReadDuration, true)
+func (s *SystemImpl) All() (*SystemStats, error) {
+	var stats SystemStats
+	var cpuErr, loadErr, ramErr, swapErr, uptimeErr, diskErr error
+
+	wg := sync.WaitGroup{}
+	wg.Add(6)
+
+	go func() { stats.CPU, cpuErr = s.CPU(); wg.Done() }()
+	go func() { stats.Load, loadErr = s.Load(); wg.Done() }()
+	go func() { stats.RAM, ramErr = s.RAM(); wg.Done() }()
+	go func() { stats.Swap, swapErr = s.Swap(); wg.Done() }()
+	go func() { stats.Uptime, uptimeErr = s.Uptime(); wg.Done() }()
+	go func() { stats.Disk, diskErr = s.Disk(); wg.Done() }()
+
+	wg.Wait()
+	if err := common.FirstError(cpuErr, loadErr, ramErr, swapErr, uptimeErr, diskErr); err != nil {
+		return nil, err
+	}
+
+	return &stats, nil
+}
+
+func (s *SystemImpl) CPU() (*CPUStats, error) {
+	cores, err := cpu.Percent(s.cpuReadDuration, true)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read cpu data: %w", err)
 	}
 
-	return &CpuStats{
+	return &CPUStats{
 		Cores: cores,
 	}, nil
 }
@@ -90,13 +129,13 @@ func (s *SystemImpl) Load() (*LoadStats, error) {
 	}, nil
 }
 
-func (s *SystemImpl) RAM() (*RamStats, error) {
+func (s *SystemImpl) RAM() (*RAMStats, error) {
 	ram, err := mem.VirtualMemory()
 	if err != nil {
 		return nil, fmt.Errorf("failed to read ram data: %w", err)
 	}
 
-	return &RamStats{
+	return &RAMStats{
 		Total:       ram.Total,
 		Free:        ram.Free,
 		Used:        ram.Used,

@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/BurntSushi/toml"
 
@@ -21,9 +22,10 @@ func LoadConfig(filename string) (Config, error) {
 }
 
 type Config struct {
-	Log          Log
-	Port         string
-	CORSAllowAll bool
+	Log             Log
+	Port            string
+	CORSAllowAll    bool
+	CPUReadDuration TextDuration
 }
 
 type Log struct {
@@ -66,5 +68,19 @@ func (c Config) ConfigureLogger(log *logger.Log) error {
 		return fmt.Errorf("unkown logger level: %q", c.Log.Level)
 	}
 
+	return nil
+}
+
+type TextDuration struct {
+	time.Duration
+}
+
+func (d *TextDuration) UnmarshalText(text []byte) error {
+	duration, err := time.ParseDuration(string(text))
+	if err != nil {
+		return err
+	}
+
+	d.Duration = duration
 	return nil
 }

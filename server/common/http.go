@@ -1,11 +1,11 @@
-package main
+package common
 
 import (
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 )
 
-func returnJSON[T any](ctx *context.Context, f func() (T, error)) {
+func ReturnJSON[T any](ctx *context.Context, f func() (T, error)) {
 	data, err := f()
 	if err != nil {
 		ctx.StopWithError(iris.StatusInternalServerError, err)
