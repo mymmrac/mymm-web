@@ -25,6 +25,7 @@ type Config struct {
 	Log             Log
 	Port            string
 	CORSAllowAll    bool
+	MongoDBHost     string
 	CPUReadDuration TextDuration
 }
 

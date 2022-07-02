@@ -5,6 +5,7 @@ import (
 
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/mymmrac/mymm.gq/server/common"
 	"github.com/mymmrac/mymm.gq/server/config"
@@ -14,7 +15,6 @@ import (
 
 type Handler struct {
 	app *iris.Application
-	cfg config.Config
 	log logger.Logger
 
 	health    model.Health
@@ -22,7 +22,7 @@ type Handler struct {
 	bookmarks model.Bookmarks
 }
 
-func NewHandler(app *iris.Application, cfg config.Config, log logger.Logger) (*Handler, error) {
+func NewHandler(app *iris.Application, cfg config.Config, log logger.Logger, dbClient *mongo.Client) (*Handler, error) {
 	health, err := model.NewHealth()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create health model: %w", err)
@@ -30,11 +30,11 @@ func NewHandler(app *iris.Application, cfg config.Config, log logger.Logger) (*H
 
 	return &Handler{
 		app: app,
-		cfg: cfg,
 		log: log,
 
-		health: health,
-		system: model.NewSystem(cfg),
+		health:    health,
+		system:    model.NewSystem(cfg),
+		bookmarks: model.NewBookmarks(dbClient),
 	}, nil
 }
 

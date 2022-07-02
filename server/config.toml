@@ -1,6 +1,8 @@
 port = "8080"
 corsAllowAll = true
 
+mongoDBHost = "localhost:27017"
+
 cpuReadDuration = "1s"
 
 [log]
