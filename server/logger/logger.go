@@ -43,7 +43,7 @@ func NewLog(log *golog.Logger) *Log {
 }
 
 func (l *Log) SetOutputFile(filename string) error {
-	file, err := os.Create(filename)
+	file, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		return fmt.Errorf("failed to create log file: %w", err)
 	}

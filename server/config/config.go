@@ -41,7 +41,7 @@ const (
 	logLevelError = "error"
 	logLevelWarn  = "warn"
 	logLevelInfo  = "info"
-	logLevelDebug = "debug"
+	LogLevelDebug = "debug"
 )
 
 func (c Config) ConfigureLogger(log *logger.Log) error {
@@ -59,7 +59,7 @@ func (c Config) ConfigureLogger(log *logger.Log) error {
 	}
 
 	switch c.Log.Level {
-	case logLevelError, logLevelWarn, logLevelInfo, logLevelDebug:
+	case logLevelError, logLevelWarn, logLevelInfo, LogLevelDebug:
 		log.SetLevel(c.Log.Level)
 	default:
 		return fmt.Errorf("unkown logger level: %q", c.Log.Level)

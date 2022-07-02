@@ -38,6 +38,15 @@ func main() {
 	if err = cfg.ConfigureLogger(log); err != nil {
 		exitWithError(err)
 	}
+	defer func() {
+		if err = log.Close(); err != nil {
+			exitWithError(err)
+		}
+	}()
+
+	if cfg.Log.Level != config.LogLevelDebug {
+		app.Configure(iris.WithoutStartupLog)
+	}
 
 	if cfg.CORSAllowAll {
 		app.UseRouter(cors.AllowAll())
@@ -69,8 +78,11 @@ func main() {
 		close(idleConnectionsClosed)
 	})
 
+	fmt.Println("Listening...")
 	_ = app.Listen(":"+cfg.Port, iris.WithoutInterruptHandler, iris.WithoutServerError(iris.ErrServerClosed))
 	<-idleConnectionsClosed
+
+	fmt.Println("Done")
 }
 
 func exitWithError(err error) {
