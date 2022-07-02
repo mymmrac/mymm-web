@@ -36,6 +36,13 @@ func ReturnError(ctx *context.Context, err error) {
 	}
 }
 
+func ReturnErrorText(ctx *context.Context, errText string) {
+	if sendErr := ctx.StopWithJSON(iris.StatusInternalServerError, responseError{Error: errText}); sendErr != nil {
+		ctx.StopWithError(iris.StatusInternalServerError, fmt.Errorf(
+			"failed to send error: %w, original error: %s", sendErr, errText))
+	}
+}
+
 func ReturnErrorWithStatus(ctx *context.Context, status int, err error) {
 	if sendErr := ctx.StopWithJSON(status, responseError{Error: err.Error()}); sendErr != nil {
 		ctx.StopWithError(iris.StatusInternalServerError, fmt.Errorf(

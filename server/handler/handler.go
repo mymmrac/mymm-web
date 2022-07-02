@@ -4,7 +4,9 @@ import (
 	"fmt"
 
 	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/context"
 
+	"github.com/mymmrac/mymm.gq/server/common"
 	"github.com/mymmrac/mymm.gq/server/config"
 	"github.com/mymmrac/mymm.gq/server/logger"
 	"github.com/mymmrac/mymm.gq/server/model"
@@ -37,6 +39,8 @@ func NewHandler(app *iris.Application, cfg config.Config, log logger.Logger) (*H
 }
 
 func (h *Handler) RegisterRoutes() {
+	h.handleErrors()
+
 	h.app.Get("/", h.healthHandler)
 
 	systemAPI := h.app.Party("/system")
@@ -53,4 +57,13 @@ func (h *Handler) RegisterRoutes() {
 	bookmarksAPI.Post("/", h.bookmarksAddHandler)
 	bookmarksAPI.Put("/", h.bookmarksUpdateHandler)
 	bookmarksAPI.Delete("/", h.bookmarksDeleteHandler)
+}
+
+func (h *Handler) handleErrors() {
+	h.app.OnErrorCode(iris.StatusNotFound, func(ctx *context.Context) {
+		common.ReturnErrorText(ctx, "404 Not Found")
+	})
+	h.app.OnErrorCode(iris.StatusInternalServerError, func(ctx *context.Context) {
+		common.ReturnErrorText(ctx, "500 Internal Server Error")
+	})
 }
