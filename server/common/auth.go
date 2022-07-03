@@ -20,7 +20,6 @@ func SafeBasicAuthLoad(filename string, userOptions ...basicauth.UserAuthOption)
 		}
 	}()
 
-	// TODO: Add max tries options
 	opts := basicauth.Options{
 		Realm: basicauth.DefaultRealm,
 		Allow: basicauth.AllowUsersFile(filename, userOptions...),
