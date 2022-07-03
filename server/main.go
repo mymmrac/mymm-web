@@ -72,7 +72,8 @@ func main() {
 	// ==== MongoDB End ====
 
 	// ==== Auth ====
-	auth, err := common.SafeBasicAuthLoad(cfg.Settings.UsersFilename, basicauth.BCRYPT)
+	authCache := common.NewCachedAuth(cfg.Settings.AuthCacheExpiration.Duration)
+	auth, err := common.SafeBasicAuthLoad(cfg.Settings.UsersFilename, basicauth.BCRYPT, authCache.Option)
 	if err != nil {
 		exitWithError(err)
 	}

@@ -6,7 +6,6 @@ import (
 
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
-	"github.com/kataras/iris/v12/middleware/basicauth"
 )
 
 func ReturnJSON[T any](ctx *context.Context, f func() (T, error)) {
@@ -56,20 +55,4 @@ func ReturnErrorTextWithStatus(ctx *context.Context, status int, errText string)
 		ctx.StopWithError(iris.StatusInternalServerError, fmt.Errorf(
 			"failed to send error: %w, original error: %s", sendErr, errText))
 	}
-}
-
-func SafeBasicAuthLoad(filename string, userOptions ...basicauth.UserAuthOption) (handler context.Handler, err error) {
-	defer func() {
-		result := recover()
-		if result != nil {
-			if panicErr, ok := result.(error); ok {
-				err = fmt.Errorf("failed to create auth: %w", panicErr)
-			} else {
-				panic(result)
-			}
-		}
-	}()
-
-	handler = basicauth.Load(filename, userOptions...)
-	return handler, err
 }

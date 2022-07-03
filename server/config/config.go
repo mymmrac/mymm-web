@@ -50,8 +50,9 @@ type MongoDB struct {
 }
 
 type Settings struct {
-	UsersFilename   string
-	CPUReadDuration TextDuration
+	UsersFilename       string
+	AuthCacheExpiration TextDuration
+	CPUReadDuration     TextDuration
 }
 
 const (

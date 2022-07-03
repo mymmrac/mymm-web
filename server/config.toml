@@ -14,4 +14,5 @@ timeout = "10s"
 
 [settings]
 usersFilename = "users.yml"
+authCacheExpiration = "1m"
 cpuReadDuration = "1s"
