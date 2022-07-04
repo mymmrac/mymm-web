@@ -1,32 +1,21 @@
 <template>
-    <footer
-        class="bg-white container my-4 mx-auto py-2 px-3 rounded shadow grid grid-cols-3 items-center"
-    >
+    <footer class="m-box container my-4 mx-auto grid grid-cols-3 items-center">
         <div>
-            &copy; 2021
-            <a
-                href="https://github.com/mymmrac"
-                target="_blank"
-                class="hover:underline"
-            >@mymmrac</a
-            >
+            &copy; 2021 - 2022
         </div>
-        <div class="justify-self-center">
+
+        <div class="justify-self-center m-hover-scale">
             <router-link to="/">
                 <i class="bi bi-x-diamond text-3xl hover:text-green-400"></i>
             </router-link>
         </div>
-        <div class="justify-self-end grid grid-flow-col gap-2">
-            <router-link class="hover:underline" to="/">Home</router-link>
-            <router-link class="hover:underline" to="/utils">Utils</router-link>
+
+        <div class="justify-self-end">
+            By <a href="https://github.com/mymmrac" target="_blank" class="hover:underline">@mymmrac</a>
         </div>
     </footer>
 </template>
 
-<script>
-export default {
-    name: "TheFooter",
-};
-</script>
+<script lang="ts" setup></script>
 
-<style scoped lang="scss"></style>
+<style lang="scss" scoped></style>

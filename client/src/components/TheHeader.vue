@@ -1,30 +1,22 @@
 <template>
-    <header
-        class="bg-white container my-4 mx-auto py-2 px-3 rounded shadow grid grid-cols-3 items-center"
-    >
+    <header class="m-box container my-4 mx-auto flex justify-between">
         <router-link to="/" class="flex items-center">
-            <i class="bi bi-x-diamond text-3xl mr-2 hover:text-green-400"></i>
-            <span>mymm</span>
+            <i class="bi bi-x-diamond text-3xl mr-2 m-hover-highlight m-hover-scale"></i>
+            <span class="hover:underline">mymm</span>
         </router-link>
-        <div class="justify-self-center grid grid-flow-col gap-2" id="header-nav">
-            <router-link to="/">Home</router-link>
-            <router-link to="/utils">Utils</router-link>
-        </div>
-        <div class="justify-self-end">
-            <a href="https://github.com/mymmrac" target="_blank">
-                <i class="bi bi-github text-3xl hover:text-green-400"></i>
+
+        <div class="grid grid-flow-col gap-3">
+            <i class="bi bi-person-circle text-3xl m-hover-scale m-hover-highlight"></i>
+            <a href="https://github.com/mymmrac" target="_blank" class="m-hover-scale m-hover-highlight">
+                <i class="bi bi-github text-3xl"></i>
             </a>
         </div>
     </header>
 </template>
 
-<script>
-export default {
-    name: "TheHeader",
-};
-</script>
+<script lang="ts" setup></script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 #header-nav {
     .router-link-exact-active {
         @apply text-green-400 hover:no-underline;

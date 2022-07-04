@@ -1,3 +1,30 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.scale-enter-active,
+.scale-leave-active {
+    transition: all 0.2s ease;
+}
+
+.scale-enter-from,
+.scale-leave-to {
+    opacity: 0;
+    transform: scale(0.98);
+}
+
+.m-box {
+    @apply py-2 px-3 rounded bg-white shadow;
+}
+
+.m-hover-scale {
+    @apply hover:scale-105 transition duration-75 cursor-pointer;
+}
+
+.m-hover-highlight {
+    @apply hover:text-green-400;
+}
+
+.m-hover-highlight-group {
+    @apply group-hover:text-green-400;
+}
