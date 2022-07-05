@@ -30,14 +30,63 @@
 
         </div>
 
-        <div class="m-box">
-            Bookmarks
+        <div class="grid m-grid gap-2">
+            <a v-for="bookmark in bookmarks" :href="bookmark.link" target="_blank" class="m-box m-item m-hover-scale">
+                <img v-if="bookmark.icon" :src="bookmark.icon" alt="Icon"
+                     class="border-0 rounded aspect-square w-1/2">
+                <i v-else class="bi bi-question-square text-7xl"></i>
+                <p class="mt-3">{{ bookmark.name }}</p>
+            </a>
         </div>
     </div>
 </template>
 
 <script lang="ts" setup>
 import BackHome from "@/components/BackHome.vue"
+import { ref, Ref } from "vue"
+
+type Bookmark = {
+    name: string,
+    link: string,
+    icon?: string,
+}
+
+const bookmarks: Ref<Bookmark[]> = ref([
+    {
+        name: "GitHub",
+        link: "https://github.com",
+    },
+    {
+        name: "Google",
+        link: "https://google.com",
+    },
+])
+
+const api = "https://favicongrabber.com/api/grab/"
+for (let i = 0; i < bookmarks.value.length; i++) {
+    const url = new URL(bookmarks.value[i].link)
+
+    fetch(api + url.hostname)
+        .then(resp => resp.json())
+        .then(data => {
+            if (!data) {
+                return
+            }
+
+            const icons: { src: string }[] = data.icons
+            if (icons.length > 0) {
+                bookmarks.value[i].icon = icons[0].src
+            }
+        })
+}
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.m-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+}
+
+.m-item {
+    @apply aspect-square flex flex-col justify-center items-center;
+}
+</style>
