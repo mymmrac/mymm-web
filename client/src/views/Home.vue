@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="grid m-grid gap-2">
-            <router-link v-for="item in menu" :to="item.link" tag="div" class="m-box m-item m-hover-scale">
+            <router-link v-for="item in menu" :key="item.name" :to="item.link" tag="div" class="m-box m-item m-hover-scale">
                 <i class="bi" :class="`bi-${item.icon}`"></i>
                 <p>{{ item.name }}</p>
             </router-link>
