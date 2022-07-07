@@ -40,3 +40,11 @@
 .m-hover-highlight-group {
     @apply group-hover:text-green-400;
 }
+
+.m-shadow {
+    @apply shadow-[0px_0px_4px_2px_rgba(0,0,0,0.1)];
+}
+
+.m-input {
+    @apply block border-0 border-b focus:ring-0 focus:border-green-400;
+}

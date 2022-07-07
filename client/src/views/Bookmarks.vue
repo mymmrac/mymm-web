@@ -15,7 +15,7 @@
         <div class="m-box flex items-center justify-between gap-3">
             <i class="bi bi-search text-3xl"></i>
             <input type="text" placeholder="Search..."
-                   class="flex-1 border-0 border-b focus:ring-0 focus:border-green-400">
+                   class="flex-1 m-input">
             <i class="bi bi-backspace text-3xl m-hover-scale m-hover-highlight"></i>
         </div>
 
@@ -24,9 +24,10 @@
                 <i class="bi bi-grid text-2xl text-green-400 m-hover-highlight-group"></i>
                 <p>All</p>
             </div>
-            <div class="m-box flex items-center gap-2 cursor-pointer m-hover-scale group">
-                <i class="bi bi-code-slash text-2xl m-hover-highlight-group"></i>
-                <p>Dev</p>
+            <div v-for="category in categories" :key="category.value"
+                 class="m-box flex items-center gap-2 cursor-pointer m-hover-scale group">
+                <i class="bi text-2xl m-hover-highlight-group" :class="`bi-${category.icon}`"></i>
+                <p>{{ category.name }}</p>
             </div>
 
         </div>
@@ -39,44 +40,52 @@
         </div>
 
         <div class="grid m-grid gap-2">
-            <a v-for="bookmark in bookmarks" :key="bookmark.id" :href="bookmark.link" target="_blank"
-               class="m-box m-item m-hover-scale relative">
-                <img v-if="bookmark.iconLink" :src="bookmark.iconLink" alt="Icon"
-                     class="border-0 rounded aspect-square w-1/2">
-                <i v-else class="bi bi-question-square text-7xl"></i>
-                <p class="mt-3">{{ bookmark.name }}</p>
-                <i class="bi bi-trash absolute top-2 right-2 m-hover-highlight m-hover-scale"
-                   @click="bookmarksStore.deleteBookmark(bookmark.id)"></i>
-            </a>
+            <div v-for="bookmark in bookmarks" :key="bookmark.id" class="m-box m-item m-hover-scale relative group">
+                <a :href="bookmark.link" target="_blank" class="flex flex-col justify-center items-center">
+                    <img v-if="bookmark.iconLink" :src="bookmark.iconLink" alt="Icon"
+                         class="border-0 rounded aspect-square w-1/2">
+                    <i v-else class="bi bi-question-square text-7xl"></i>
+                    <p class="mt-3">{{ bookmark.name }}</p>
+                </a>
+
+                <i class="bi bi-trash absolute top-2 right-2 hidden group-hover:block m-hover-highlight m-hover-scale"
+                   @click.stop="askToDeleteBookmark(bookmark)"></i>
+            </div>
         </div>
 
-        <modal-box :shown="showAddModal" @closed="showAddModal = false" title="New Bookmark" close-button>
-            <form class="grid grid-cols-1">
-                <label>
-                    Name
-                    <input type="text" v-model="newBookmark.name">
-                </label>
-                <label>
-                    Link
-                    <input type="text" v-model="newBookmark.link">
-                </label>
-                <label>
-                    Category
-                    <select v-model="newBookmark.category">
-                        <option disabled selected>None</option>
-                        <option value="dev">Dev</option>
-                    </select>
-                </label>
+        <modal-box :shown="showAddModal" @closed="closeNewBookmark" title="New Bookmark" close-button>
+            <form class="grid items-center grid-cols-[0.5fr_1fr] p-4 space-y-2">
+                <label class="block">Name</label>
+                <input type="text" class="m-input" v-model="newBookmark.name" placeholder="...">
 
-                <button @click.prevent="bookmarksStore.addBookmark(newBookmark)">Add</button>
+                <label class="block">Link</label>
+                <input type="text" class="m-input" v-model="newBookmark.link" placeholder="...">
+
+                <label class="block">Category</label>
+                <select v-model="newBookmark.category" class="m-input">
+                    <option v-for="category in categories" :key="category.value" :value="category.value">
+                        {{ category.name }}
+                    </option>
+                </select>
+
+                <div class="col-span-2 h-4"></div>
+                <div v-show="newBookmarkError" class="col-span-2 py-2 text-center text-red-500">
+                    {{ newBookmarkError }}
+                </div>
+                <button class="col-span-2 m-hover-highlight m-hover-scale rounded py-2 m-shadow"
+                        @click.prevent="addBookmark">Add
+                </button>
             </form>
         </modal-box>
 
-        <modal-box :shown="showDeleteModal" title="Do you want to delete?" close-button>
-            <div class="flex justify-center gap-4">
-                <button class="rounded border bg-red-400 px-3 py-2">Delete</button>
-                <button class="rounded border bg-gray-200 px-3 py-2" @click="showDeleteModal = false">Close</button>
+        <modal-box :shown="showDeleteModal" @closed="showDeleteModal = false" title="Do you want to delete?"
+                   close-button>
+            <div class="p-4">
+                <button class="m-hover-scale rounded py-2 px-3 w-full m-shadow text-red-500" @click="deleteBookmark">
+                    Delete
+                </button>
             </div>
+
         </modal-box>
     </div>
 </template>
@@ -88,7 +97,29 @@ import ModalBox from "@/components/ModalBox.vue"
 import { ref, Ref } from "vue"
 import { storeToRefs } from "pinia"
 
-import { NewBookmark } from "@/entity/bookmarks"
+const categories: Ref<{
+    name: string,
+    value: string,
+    icon: string,
+}[]> = ref([
+    {
+        name: "Dev",
+        value: "dev",
+        icon: "code-slash",
+    },
+    {
+        name: "Utils",
+        value: "utils",
+        icon: "paperclip",
+    },
+    {
+        name: "Converters",
+        value: "converters",
+        icon: "recycle",
+    },
+])
+
+import { Bookmark, NewBookmark } from "@/entity/bookmarks"
 import { useBookmarksStore } from "@/stores/bookmarks"
 import { useAuthStore } from "@/stores/auth"
 
@@ -101,13 +132,65 @@ bookmarksStore.loadBookmarks()
 const { bookmarks, loading, error } = storeToRefs(bookmarksStore)
 
 let showAddModal = ref(false)
-let newBookmark: Ref<NewBookmark> = ref({
-    name: "",
-    link: "",
-    category: "",
-})
+let newBookmark: Ref<NewBookmark> = ref(<NewBookmark>{})
+let newBookmarkError: Ref<string> = ref("")
+
+function addBookmark() {
+    newBookmarkError.value = ""
+    const nb = newBookmark.value
+
+    if (nb.name.length < 1) {
+        newBookmarkError.value = "Name can't be empty"
+        return
+    }
+
+    if (nb.link.length < 1) {
+        newBookmarkError.value = "Link can't be empty"
+        return
+    }
+
+    try {
+        const url = new URL(nb.link)
+        if (!url.hostname) {
+            newBookmarkError.value = "Link is not a valid URL"
+            return
+        }
+    } catch (error) {
+        newBookmarkError.value = "Link can't be parsed to URL"
+        return
+    }
+
+    if (nb.category.length < 1) {
+        newBookmarkError.value = "Category should be selected"
+        return
+    }
+
+    bookmarksStore.addBookmark(nb)
+        .then(closeNewBookmark)
+        .catch((error) => {
+            newBookmarkError.value = "Error: " + error
+            return
+        })
+}
+
+function closeNewBookmark() {
+    showAddModal.value = false
+    newBookmarkError.value = ""
+    newBookmark.value = <NewBookmark>{}
+}
 
 let showDeleteModal = ref(false)
+let deleteBookmarkData: Ref<Bookmark> = ref(<Bookmark>{})
+
+function askToDeleteBookmark(bookmark: Bookmark) {
+    showDeleteModal.value = true
+    deleteBookmarkData.value = bookmark
+}
+
+function deleteBookmark() {
+    showDeleteModal.value = false
+    bookmarksStore.deleteBookmark(deleteBookmarkData.value.id)
+}
 </script>
 
 <style lang="scss" scoped>
@@ -116,6 +199,6 @@ let showDeleteModal = ref(false)
 }
 
 .m-item {
-    @apply aspect-square flex flex-col justify-center items-center;
+    @apply aspect-square grid;
 }
 </style>

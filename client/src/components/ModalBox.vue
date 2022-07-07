@@ -1,6 +1,6 @@
 <template>
     <div v-if="show" @click="close"
-         class="fixed bg-gray-700/25 top-0 left-0 bottom-0 right-0 grid place-content-center">
+         class="fixed bg-gray-700/25 top-0 left-0 bottom-0 right-0 grid place-content-center p-2">
         <div class="m-box relative" @click.stop>
             <div v-if="title" class="flex justify-between items-center gap-4">
                 <p class="text-lg">{{ title }}</p>
