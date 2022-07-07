@@ -7,7 +7,8 @@
                     <i class="bi bi-journal-bookmark text-3xl"></i>
                     <p class="uppercase">Bookmarks</p>
                 </div>
-                <i class="bi bi-bookmark-plus text-3xl self-end m-hover-scale m-hover-highlight"></i>
+                <i class="bi bi-bookmark-plus text-3xl self-end m-hover-scale m-hover-highlight"
+                   @click="showAddModal = true"></i>
             </div>
         </div>
 
@@ -30,55 +31,83 @@
 
         </div>
 
+        <div class="m-box" v-if="loading">
+            Loading...
+        </div>
+        <div class="m-box" v-if="error">
+            Error: {{ error }}
+        </div>
+
         <div class="grid m-grid gap-2">
-            <a v-for="bookmark in bookmarks" :href="bookmark.link" target="_blank" class="m-box m-item m-hover-scale">
-                <img v-if="bookmark.icon" :src="bookmark.icon" alt="Icon"
+            <a v-for="bookmark in bookmarks" :key="bookmark.id" :href="bookmark.link" target="_blank"
+               class="m-box m-item m-hover-scale relative">
+                <img v-if="bookmark.iconLink" :src="bookmark.iconLink" alt="Icon"
                      class="border-0 rounded aspect-square w-1/2">
                 <i v-else class="bi bi-question-square text-7xl"></i>
                 <p class="mt-3">{{ bookmark.name }}</p>
+                <i class="bi bi-trash absolute top-2 right-2 m-hover-highlight m-hover-scale"
+                   @click="bookmarksStore.deleteBookmark(bookmark.id)"></i>
             </a>
         </div>
+
+        <modal-box :shown="showAddModal" @closed="showAddModal = false" title="New Bookmark" close-button>
+            <form class="grid grid-cols-1">
+                <label>
+                    Name
+                    <input type="text" v-model="newBookmark.name">
+                </label>
+                <label>
+                    Link
+                    <input type="text" v-model="newBookmark.link">
+                </label>
+                <label>
+                    Category
+                    <select v-model="newBookmark.category">
+                        <option disabled selected>None</option>
+                        <option value="dev">Dev</option>
+                    </select>
+                </label>
+
+                <button @click.prevent="bookmarksStore.addBookmark(newBookmark)">Add</button>
+            </form>
+        </modal-box>
+
+        <modal-box :shown="showDeleteModal" title="Do you want to delete?" close-button>
+            <div class="flex justify-center gap-4">
+                <button class="rounded border bg-red-400 px-3 py-2">Delete</button>
+                <button class="rounded border bg-gray-200 px-3 py-2" @click="showDeleteModal = false">Close</button>
+            </div>
+        </modal-box>
     </div>
 </template>
 
 <script lang="ts" setup>
 import BackHome from "@/components/BackHome.vue"
+import ModalBox from "@/components/ModalBox.vue"
+
 import { ref, Ref } from "vue"
+import { storeToRefs } from "pinia"
 
-type Bookmark = {
-    name: string,
-    link: string,
-    icon?: string,
-}
+import { NewBookmark } from "@/entity/bookmarks"
+import { useBookmarksStore } from "@/stores/bookmarks"
+import { useAuthStore } from "@/stores/auth"
 
-const bookmarks: Ref<Bookmark[]> = ref([
-    {
-        name: "GitHub",
-        link: "https://github.com",
-    },
-    {
-        name: "Google",
-        link: "https://google.com",
-    },
-])
+const authStore = useAuthStore()
+authStore.login("mymmrac", "pass")
 
-const api = "https://favicongrabber.com/api/grab/"
-for (let i = 0; i < bookmarks.value.length; i++) {
-    const url = new URL(bookmarks.value[i].link)
+const bookmarksStore = useBookmarksStore()
+bookmarksStore.loadBookmarks()
 
-    fetch(api + url.hostname)
-        .then(resp => resp.json())
-        .then(data => {
-            if (!data) {
-                return
-            }
+const { bookmarks, loading, error } = storeToRefs(bookmarksStore)
 
-            const icons: { src: string }[] = data.icons
-            if (icons.length > 0) {
-                bookmarks.value[i].icon = icons[0].src
-            }
-        })
-}
+let showAddModal = ref(false)
+let newBookmark: Ref<NewBookmark> = ref({
+    name: "",
+    link: "",
+    category: "",
+})
+
+let showDeleteModal = ref(false)
 </script>
 
 <style lang="scss" scoped>
