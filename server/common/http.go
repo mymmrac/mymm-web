@@ -18,6 +18,7 @@ func ReturnJSON[T any](ctx *context.Context, f func() (T, error)) {
 	if _, err = ctx.JSON(data); err != nil {
 		ReturnError(ctx, err)
 	}
+	ctx.StatusCode(iris.StatusOK)
 }
 
 type responseError struct {

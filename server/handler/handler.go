@@ -37,7 +37,7 @@ func NewHandler(app *iris.Application, auth context.Handler, cfg config.Config, 
 
 		health:    health,
 		system:    model.NewSystem(cfg),
-		bookmarks: model.NewBookmarks(mongoClient),
+		bookmarks: model.NewBookmarks(log, mongoClient),
 	}, nil
 }
 

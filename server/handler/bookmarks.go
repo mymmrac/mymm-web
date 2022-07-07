@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"github.com/google/uuid"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 
@@ -20,10 +19,16 @@ func (h *Handler) bookmarksAddHandler(ctx *context.Context) {
 		return
 	}
 
-	if err := h.bookmarks.Add(request); err != nil {
+	bookmark, err := h.bookmarks.Add(request)
+	if err != nil {
 		common.ReturnError(ctx, err)
 		return
 	}
+
+	if _, err = ctx.JSON(bookmark); err != nil {
+		common.ReturnError(ctx, err)
+	}
+
 	ctx.StatusCode(iris.StatusOK)
 }
 
@@ -34,7 +39,7 @@ func (h *Handler) bookmarksUpdateHandler(ctx *context.Context) {
 		return
 	}
 
-	if bookmark.ID == uuid.Nil {
+	if bookmark.ID == model.NilObjectID {
 		common.ReturnErrorTextWithStatus(ctx, iris.StatusBadRequest, "bookmark ID is empty")
 		return
 	}
@@ -43,17 +48,18 @@ func (h *Handler) bookmarksUpdateHandler(ctx *context.Context) {
 		common.ReturnError(ctx, err)
 		return
 	}
+
 	ctx.StatusCode(iris.StatusOK)
 }
 
 func (h *Handler) bookmarksDeleteHandler(ctx *context.Context) {
-	var bookmarkID uuid.UUID
+	var bookmarkID model.ObjectID
 	if err := ctx.ReadJSON(&bookmarkID); err != nil {
 		common.ReturnErrorWithStatus(ctx, iris.StatusBadRequest, err)
 		return
 	}
 
-	if bookmarkID == uuid.Nil {
+	if bookmarkID == model.NilObjectID {
 		common.ReturnErrorTextWithStatus(ctx, iris.StatusBadRequest, "bookmark ID is empty")
 		return
 	}
@@ -62,5 +68,6 @@ func (h *Handler) bookmarksDeleteHandler(ctx *context.Context) {
 		common.ReturnError(ctx, err)
 		return
 	}
+
 	ctx.StatusCode(iris.StatusOK)
 }

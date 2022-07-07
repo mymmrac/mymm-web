@@ -59,7 +59,6 @@ func main() {
 	mongoCtx, mongoCancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer mongoCancel()
 	mongoClient, err := mongo.Connect(mongoCtx, options.Client().
-		SetRegistry(common.MongoRegistry).
 		ApplyURI("mongodb://"+cfg.Infrastructure.MongoDB.Host))
 	defer func() {
 		if err = mongoClient.Disconnect(mongoCtx); err != nil {
