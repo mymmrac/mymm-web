@@ -50,6 +50,8 @@
 
                 <i class="bi bi-trash absolute top-2 right-2 hidden group-hover:block m-hover-highlight m-hover-scale"
                    @click.stop="askToDeleteBookmark(bookmark)"></i>
+
+                <i class="bi absolute bottom-1 left-2" :class="`bi-${getCategory(bookmark.category).icon}`"></i>
             </div>
         </div>
 
@@ -97,11 +99,19 @@ import ModalBox from "@/components/ModalBox.vue"
 import { ref, Ref } from "vue"
 import { storeToRefs } from "pinia"
 
-const categories: Ref<{
-    name: string,
-    value: string,
-    icon: string,
-}[]> = ref([
+import { Bookmark, NewBookmark, Categories, Category } from "@/entity/bookmarks"
+import { useBookmarksStore } from "@/stores/bookmarks"
+import { useAuthStore } from "@/stores/auth"
+
+const authStore = useAuthStore()
+authStore.login("mymmrac", "pass")
+
+const bookmarksStore = useBookmarksStore()
+bookmarksStore.loadBookmarks()
+
+const { bookmarks, loading, error } = storeToRefs(bookmarksStore)
+
+const categories: Ref<Categories> = ref([
     {
         name: "Dev",
         value: "dev",
@@ -119,17 +129,9 @@ const categories: Ref<{
     },
 ])
 
-import { Bookmark, NewBookmark } from "@/entity/bookmarks"
-import { useBookmarksStore } from "@/stores/bookmarks"
-import { useAuthStore } from "@/stores/auth"
-
-const authStore = useAuthStore()
-authStore.login("mymmrac", "pass")
-
-const bookmarksStore = useBookmarksStore()
-bookmarksStore.loadBookmarks()
-
-const { bookmarks, loading, error } = storeToRefs(bookmarksStore)
+function getCategory(category: string): Category {
+    return categories.value.find(c => c.value == category)!
+}
 
 let showAddModal = ref(false)
 let newBookmark: Ref<NewBookmark> = ref(<NewBookmark>{})
