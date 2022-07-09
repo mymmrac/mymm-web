@@ -14,22 +14,17 @@
 
         <div class="m-box flex items-center justify-between gap-3">
             <i class="bi bi-search text-3xl"></i>
-            <input type="text" placeholder="Search..."
-                   class="flex-1 m-input">
-            <i class="bi bi-backspace text-3xl m-hover-scale m-hover-highlight"></i>
+            <input type="text" placeholder="Search..." class="flex-1 m-input" v-model="searchInput">
+            <i class="bi bi-backspace text-3xl m-hover-scale m-hover-highlight" @click="searchInput = ''"></i>
         </div>
 
-        <div class="flex gap-2">
-            <div class="m-box flex items-center gap-2 cursor-pointer m-hover-scale group">
-                <i class="bi bi-grid text-2xl text-green-400 m-hover-highlight-group"></i>
-                <p>All</p>
-            </div>
-            <div v-for="category in categories" :key="category.value"
+        <div class="flex flex-wrap gap-2">
+            <div v-for="category in categories" :key="category.value" @click="selectedCategory = category.value"
                  class="m-box flex items-center gap-2 cursor-pointer m-hover-scale group">
-                <i class="bi text-2xl m-hover-highlight-group" :class="`bi-${category.icon}`"></i>
+                <i class="bi text-2xl m-hover-highlight-group transition duration-400"
+                   :class="`bi-${category.icon} ${selectedCategory === category.value ? 'text-green-400' : ''}`"></i>
                 <p>{{ category.name }}</p>
             </div>
-
         </div>
 
         <div class="m-box" v-if="bookmarksError">
@@ -37,7 +32,8 @@
         </div>
 
         <div class="grid m-grid gap-2">
-            <div v-for="bookmark in bookmarks" :key="bookmark.id" class="m-box m-item m-hover-scale relative group">
+            <div v-for="bookmark in displayedBookmarks" :key="bookmark.id"
+                 class="m-box m-item m-hover-scale relative group">
                 <a :href="bookmark.link" target="_blank" class="flex flex-col justify-center items-center">
                     <img v-if="bookmark.iconLink" :src="bookmark.iconLink" alt="Icon"
                          class="border-0 rounded aspect-square w-1/2">
@@ -97,12 +93,12 @@
 import BackHome from "@/components/BackHome.vue"
 import ModalBox from "@/components/ModalBox.vue"
 
-import { ref, Ref } from "vue"
+import { computed, ComputedRef, ref, Ref } from "vue"
 import { storeToRefs } from "pinia"
 
 import { useAuthStore } from "@/stores/auth"
 import { useBookmarksStore } from "@/stores/bookmarks"
-import { Bookmark, NewBookmark, Categories, Category } from "@/entity/bookmarks"
+import { Bookmark, NewBookmark, Categories, Category, Bookmarks } from "@/entity/bookmarks"
 
 const authStore = useAuthStore()
 let { authorized } = storeToRefs(authStore)
@@ -118,6 +114,11 @@ bookmarksStore.loadBookmarks()
 
 const categories: Ref<Categories> = ref([
     {
+        name: "All",
+        value: "all",
+        icon: "grid",
+    },
+    {
         name: "Dev",
         value: "dev",
         icon: "code-slash",
@@ -126,6 +127,11 @@ const categories: Ref<Categories> = ref([
         name: "Utils",
         value: "utils",
         icon: "paperclip",
+    },
+    {
+        name: "Assets",
+        value: "assets",
+        icon: "image",
     },
     {
         name: "Converters",
@@ -137,6 +143,37 @@ const categories: Ref<Categories> = ref([
 function getCategory(category: string): Category {
     return categories.value.find(c => c.value == category)!
 }
+
+let selectedCategory: Ref<string> = ref("all")
+let searchInput: Ref<string> = ref("")
+
+const displayedBookmarks: ComputedRef<Bookmarks> = computed(() => {
+    let resultingBookmarks = bookmarks.value.slice()
+
+    if (selectedCategory.value !== "all") {
+        resultingBookmarks = resultingBookmarks.filter(bookmark => bookmark.category === selectedCategory.value)
+    }
+
+    if (searchInput.value !== "") {
+        resultingBookmarks = resultingBookmarks.filter(bookmark => {
+            const bookmarkInfo = bookmark.name + " " + bookmark.link
+
+            let ok = false
+
+            const keywords = searchInput.value.split(" ")
+            for (let i = 0; i < keywords.length; i++) {
+                if (!bookmarkInfo.includes(keywords[i])) {
+                    ok = true
+                    break
+                }
+            }
+
+            return !ok
+        })
+    }
+
+    return resultingBookmarks
+})
 
 let showAddModal = ref(false)
 let newBookmark: Ref<NewBookmark> = ref({
