@@ -32,11 +32,8 @@
 
         </div>
 
-        <div class="m-box" v-if="loading">
-            Loading...
-        </div>
-        <div class="m-box" v-if="error">
-            Error: {{ error }}
+        <div class="m-box" v-if="bookmarksError">
+            Error: {{ bookmarksError }}
         </div>
 
         <div class="grid m-grid gap-2">
@@ -74,8 +71,9 @@
                 <div v-show="newBookmarkError" class="col-span-2 py-2 text-center text-red-500">
                     {{ newBookmarkError }}
                 </div>
-                <button class="col-span-2 m-hover-highlight m-hover-scale rounded py-2 m-shadow"
-                        @click.prevent="addBookmark">Add
+                <button class="col-span-2 m-hover-highlight m-hover-scale rounded py-2 m-shadow disabled:text-gray-400"
+                        @click.prevent="addBookmark" :disabled="addLoading">
+                    {{ addLoading ? "Adding..." : "Add" }}
                 </button>
             </form>
         </modal-box>
@@ -83,6 +81,9 @@
         <modal-box :shown="showDeleteModal" @closed="showDeleteModal = false" title="Do you want to delete?"
                    close-button>
             <div class="p-4">
+                <div v-show="deleteBookmarkError" class="col-span-2 py-2 text-center text-red-500">
+                    {{ deleteBookmarkError }}
+                </div>
                 <button class="m-hover-scale rounded py-2 px-3 w-full m-shadow text-red-500" @click="deleteBookmark">
                     Delete
                 </button>
@@ -101,15 +102,15 @@ import { storeToRefs } from "pinia"
 
 import { Bookmark, NewBookmark, Categories, Category } from "@/entity/bookmarks"
 import { useBookmarksStore } from "@/stores/bookmarks"
-import { useAuthStore } from "@/stores/auth"
-
-const authStore = useAuthStore()
-authStore.login("mymmrac", "pass")
 
 const bookmarksStore = useBookmarksStore()
-bookmarksStore.loadBookmarks()
+const { bookmarks } = storeToRefs(bookmarksStore)
 
-const { bookmarks, loading, error } = storeToRefs(bookmarksStore)
+let bookmarksError: Ref<string> = ref("")
+bookmarksStore.loadBookmarks()
+    .catch(error => {
+        bookmarksError.value = error
+    })
 
 const categories: Ref<Categories> = ref([
     {
@@ -134,8 +135,13 @@ function getCategory(category: string): Category {
 }
 
 let showAddModal = ref(false)
-let newBookmark: Ref<NewBookmark> = ref(<NewBookmark>{})
+let newBookmark: Ref<NewBookmark> = ref({
+    name: "",
+    link: "",
+    category: "",
+})
 let newBookmarkError: Ref<string> = ref("")
+let addLoading = ref(false)
 
 function addBookmark() {
     newBookmarkError.value = ""
@@ -167,31 +173,46 @@ function addBookmark() {
         return
     }
 
+    addLoading.value = true
     bookmarksStore.addBookmark(nb)
         .then(closeNewBookmark)
         .catch((error) => {
             newBookmarkError.value = "Error: " + error
             return
         })
+        .finally(() => {
+            addLoading.value = false
+        })
 }
 
 function closeNewBookmark() {
     showAddModal.value = false
     newBookmarkError.value = ""
-    newBookmark.value = <NewBookmark>{}
+    newBookmark.value = {
+        name: "",
+        link: "",
+        category: "",
+    }
 }
 
 let showDeleteModal = ref(false)
 let deleteBookmarkData: Ref<Bookmark> = ref(<Bookmark>{})
+let deleteBookmarkError: Ref<string> = ref("")
 
 function askToDeleteBookmark(bookmark: Bookmark) {
+    deleteBookmarkError.value = ""
     showDeleteModal.value = true
     deleteBookmarkData.value = bookmark
 }
 
 function deleteBookmark() {
-    showDeleteModal.value = false
     bookmarksStore.deleteBookmark(deleteBookmarkData.value.id)
+        .then(() => {
+            showDeleteModal.value = false
+        })
+        .catch((error) => {
+            deleteBookmarkError.value = error
+        })
 }
 </script>
 

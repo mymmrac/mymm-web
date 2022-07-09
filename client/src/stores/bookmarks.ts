@@ -6,15 +6,12 @@ import server from "@/services/server"
 
 export const useBookmarksStore = defineStore("bookmarks", {
     state: () => ({
-        loading: false,
-        error: <any>null,
         bookmarks: <Bookmarks>[],
     }),
 
     actions: {
-        async loadBookmarks() {
-            this.loading = true
-            server.getBookmarks()
+        async loadBookmarks(): Promise<void> {
+            return await server.getBookmarks()
                 .then(bookmarks => {
                     if (bookmarks) {
                         this.bookmarks = bookmarks
@@ -22,20 +19,20 @@ export const useBookmarksStore = defineStore("bookmarks", {
                         this.bookmarks = []
                     }
                 })
-                .catch(error => this.error = error)
-                .finally(() => this.loading = false)
         },
 
-        async addBookmark(newBookmark: NewBookmark) {
-            server.addBookmark(newBookmark)
-                .then(bookmark => this.bookmarks.push(bookmark))
-                .catch(error => this.error = error)
+        async addBookmark(newBookmark: NewBookmark): Promise<void> {
+            return await server.addBookmark(newBookmark)
+                .then(bookmark => {
+                    this.bookmarks.push(bookmark)
+                })
         },
 
-        async deleteBookmark(bookmarkID: string) {
-            server.deleteBookmark(bookmarkID)
-                .then(() => this.bookmarks = this.bookmarks.filter(bookmark => bookmark.id != bookmarkID))
-                .catch(error => this.error = error)
+        async deleteBookmark(bookmarkID: string): Promise<void> {
+            return await server.deleteBookmark(bookmarkID)
+                .then(() => {
+                    this.bookmarks = this.bookmarks.filter(bookmark => bookmark.id != bookmarkID)
+                })
         },
     },
 })

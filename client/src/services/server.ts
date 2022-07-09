@@ -18,20 +18,25 @@ export default {
         authStore = auth
     },
 
-    async getBookmarks() {
-        return serverAPI.get<Bookmarks>("/bookmarks")
+    async login(): Promise<boolean> {
+        return await serverAPI.get("/login", { headers: { "Authorization": authStore.authHeader } })
+            .then(response => response.status == 202)
+    },
+
+    async getBookmarks(): Promise<Bookmarks> {
+        return await serverAPI.get<Bookmarks>("/bookmarks")
             .then(response => response.data)
     },
 
-    async addBookmark(newBookmark: NewBookmark) {
-        return serverAPI.post<Bookmark>("/bookmarks", newBookmark, {
+    async addBookmark(newBookmark: NewBookmark): Promise<Bookmark> {
+        return await serverAPI.post<Bookmark>("/bookmarks", newBookmark, {
             headers: { "Authorization": authStore.authHeader },
         })
             .then(response => response.data)
     },
 
-    async deleteBookmark(bookmarkID: string) {
-        return serverAPI.delete("/bookmarks", {
+    async deleteBookmark(bookmarkID: string): Promise<void> {
+        return await serverAPI.delete("/bookmarks", {
             headers: { "Authorization": authStore.authHeader },
             data: bookmarkID,
         })
