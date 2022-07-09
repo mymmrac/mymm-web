@@ -45,6 +45,7 @@ func (h *Handler) RegisterRoutes() {
 	h.handleErrors()
 
 	h.app.Get("/", h.healthHandler)
+	h.app.Get("/login", h.auth, h.loginCheckHandler)
 
 	systemAPI := h.app.Party("/system", h.auth)
 	systemAPI.Get("/", h.systemAllHandler)
