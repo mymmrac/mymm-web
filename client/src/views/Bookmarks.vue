@@ -7,7 +7,7 @@
                     <i class="bi bi-journal-bookmark text-3xl"></i>
                     <p class="uppercase">Bookmarks</p>
                 </div>
-                <i class="bi bi-bookmark-plus text-3xl self-end m-hover-scale m-hover-highlight"
+                <i v-if="authorized" class="bi bi-bookmark-plus text-3xl self-end m-hover-scale m-hover-highlight"
                    @click="showAddModal = true"></i>
             </div>
         </div>
@@ -46,7 +46,7 @@
                 </a>
 
                 <i class="bi bi-trash absolute top-2 right-2 hidden group-hover:block m-hover-highlight m-hover-scale"
-                   @click.stop="askToDeleteBookmark(bookmark)"></i>
+                   v-if="authorized" @click.stop="askToDeleteBookmark(bookmark)"></i>
 
                 <i class="bi absolute bottom-1 left-2" :class="`bi-${getCategory(bookmark.category).icon}`"></i>
             </div>
@@ -100,8 +100,12 @@ import ModalBox from "@/components/ModalBox.vue"
 import { ref, Ref } from "vue"
 import { storeToRefs } from "pinia"
 
-import { Bookmark, NewBookmark, Categories, Category } from "@/entity/bookmarks"
+import { useAuthStore } from "@/stores/auth"
 import { useBookmarksStore } from "@/stores/bookmarks"
+import { Bookmark, NewBookmark, Categories, Category } from "@/entity/bookmarks"
+
+const authStore = useAuthStore()
+let { authorized } = storeToRefs(authStore)
 
 const bookmarksStore = useBookmarksStore()
 const { bookmarks } = storeToRefs(bookmarksStore)
