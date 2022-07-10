@@ -1,3 +1,4 @@
+import { System } from "@/entity/system"
 import axios from "axios"
 
 import { Bookmark, NewBookmark, Bookmarks } from "@/entity/bookmarks"
@@ -46,5 +47,12 @@ export default {
             headers: { "Authorization": authStore.authHeader },
             data: bookmarkID,
         })
+    },
+
+    async getSystemInfo(): Promise<System> {
+        return await serverAPI.get<System>("/system", {
+            headers: { "Authorization": authStore.authHeader },
+        })
+            .then(response => response.data)
     },
 }
