@@ -3,7 +3,7 @@
 
     <main class="container mx-auto flex-grow relative grid grid-flow-row gap-2">
         <router-view v-slot="{ Component }">
-            <transition name="scale" mode="out-in">
+            <transition name="m-scale" mode="out-in">
                 <component :is="Component"/>
             </transition>
         </router-view>

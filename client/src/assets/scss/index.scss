@@ -14,15 +14,18 @@
     }
 }
 
-.scale-enter-active,
-.scale-leave-active {
-    transition: all 0.2s ease;
-}
+.m-scale {
+    &-move,
+    &-enter-active,
+    &-leave-active {
+        transition: all 0.2s ease;
+    }
 
-.scale-enter-from,
-.scale-leave-to {
-    opacity: 0;
-    transform: scale(0.98);
+    &-enter-from,
+    &-leave-to {
+        opacity: 0;
+        transform: scale(0.98);
+    }
 }
 
 .m-box {

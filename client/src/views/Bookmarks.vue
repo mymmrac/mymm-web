@@ -31,7 +31,7 @@
             Error: {{ bookmarksError }}
         </div>
 
-        <div class="grid m-grid gap-2">
+        <transition-group tag="div" class="grid m-grid gap-2 relative">
             <div v-for="bookmark in displayedBookmarks" :key="bookmark.id"
                  class="m-box m-item m-hover-scale relative group">
                 <a :href="bookmark.link" target="_blank" class="flex flex-col justify-center items-center">
@@ -46,7 +46,7 @@
 
                 <i class="bi absolute bottom-1 left-2" :class="`bi-${getCategory(bookmark.category).icon}`"></i>
             </div>
-        </div>
+        </transition-group>
 
         <modal-box :shown="showAddModal" @closed="closeNewBookmark" title="New Bookmark" close-button>
             <form class="grid items-center grid-cols-[0.5fr_1fr] p-4 space-y-2">
