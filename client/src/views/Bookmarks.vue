@@ -7,8 +7,14 @@
                     <i class="bi bi-journal-bookmark text-3xl"></i>
                     <p class="uppercase">Bookmarks</p>
                 </div>
-                <i v-if="authorized" class="bi bi-bookmark-plus text-3xl self-end m-hover-scale m-hover-highlight"
-                   @click="showAddModal = true"></i>
+
+                <div class="self-end flex gap-2">
+                    <i class="bi bi-download text-3xl self-end m-hover-scale m-hover-highlight"
+                       @click="showExportJSONModal = true"></i>
+
+                    <i v-if="authorized" class="bi bi-bookmark-plus text-3xl m-hover-scale m-hover-highlight"
+                       @click="showAddModal = true"></i>
+                </div>
             </div>
         </div>
 
@@ -118,7 +124,13 @@
                     Delete
                 </button>
             </div>
+        </modal-box>
 
+        <modal-box :shown="showExportJSONModal" @closed="showExportJSONModal = false" title="Exported Bookmarks"
+                   close-button>
+            <div class="p-4">
+                <pre class="max-h-[800px] overflow-auto">{{ JSON.stringify(bookmarks, null, 4) }}</pre>
+            </div>
         </modal-box>
     </div>
 </template>
@@ -344,6 +356,8 @@ function deleteBookmark() {
             deleteBookmarkError.value = error
         })
 }
+
+let showExportJSONModal = ref(false)
 </script>
 
 <style lang="scss" scoped>
