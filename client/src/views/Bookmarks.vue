@@ -37,14 +37,15 @@
             Error: {{ bookmarksError }}
         </div>
 
-        <transition-group tag="div" class="grid m-grid gap-2 relative">
+        <div class="grid m-grid gap-2 relative">
             <div v-for="bookmark in displayedBookmarks" :key="bookmark.id"
                  class="m-box m-item m-hover-scale relative group">
-                <a :href="bookmark.link" target="_blank" class="flex flex-col justify-center items-center">
+                <a :href="bookmark.link" :title="bookmark.name" target="_blank"
+                   class="flex flex-col justify-center items-center">
                     <img v-if="bookmark.iconLink" :src="bookmark.iconLink" alt="Icon"
                          class="border-0 rounded aspect-square w-1/2">
                     <i v-else class="bi bi-question-square text-7xl"></i>
-                    <p class="mt-3">{{ bookmark.name }}</p>
+                    <p class="mt-3 line-clamp-1 text-center">{{ bookmark.name }}</p>
                 </a>
 
                 <div class="absolute top-2 right-2 flex flex-col">
@@ -57,7 +58,7 @@
 
                 <i class="bi absolute bottom-1 left-2" :class="`bi-${getCategory(bookmark.category).icon}`"></i>
             </div>
-        </transition-group>
+        </div>
 
         <modal-box :shown="showAddModal" @closed="closeNewBookmark" title="New Bookmark" close-button>
             <form class="grid items-center grid-cols-[0.5fr_1fr] p-4 space-y-2">
@@ -177,12 +178,32 @@ const categories: Ref<Categories> = ref([
     {
         name: "Assets",
         value: "assets",
-        icon: "image",
+        icon: "collection",
     },
     {
         name: "Converters",
         value: "converters",
         icon: "recycle",
+    },
+    {
+        name: "Generators",
+        value: "generators",
+        icon: "motherboard",
+    },
+    {
+        name: "Text",
+        value: "text",
+        icon: "text-paragraph",
+    },
+    {
+        name: "Images",
+        value: "images",
+        icon: "images",
+    },
+    {
+        name: "Files",
+        value: "files",
+        icon: "file-earmark-binary",
     },
 ])
 
@@ -202,11 +223,10 @@ const displayedBookmarks: ComputedRef<Bookmarks> = computed(() => {
 
     if (searchInput.value !== "") {
         resultingBookmarks = resultingBookmarks.filter(bookmark => {
-            const bookmarkInfo = bookmark.name + " " + bookmark.link
+            const bookmarkInfo = (bookmark.name + " " + bookmark.link).toLowerCase()
 
             let ok = false
-
-            const keywords = searchInput.value.split(" ")
+            const keywords = searchInput.value.toLowerCase().split(" ")
             for (let i = 0; i < keywords.length; i++) {
                 if (!bookmarkInfo.includes(keywords[i])) {
                     ok = true
@@ -217,6 +237,9 @@ const displayedBookmarks: ComputedRef<Bookmarks> = computed(() => {
             return !ok
         })
     }
+
+    resultingBookmarks = resultingBookmarks.sort((b1, b2) =>
+        b1.name.toLowerCase().localeCompare(b2.name.toLowerCase()))
 
     return resultingBookmarks
 })

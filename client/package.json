@@ -3,8 +3,8 @@
     "private": true,
     "version": "0.1.0",
     "scripts": {
-        "dev": "vite",
-        "build": "vue-tsc --noEmit && vite build",
+        "dev": "vite --mode development",
+        "build": "vue-tsc --noEmit && vite build --mode production",
         "preview": "vite preview"
     },
     "dependencies": {
@@ -16,6 +16,7 @@
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.2",
+        "@tailwindcss/line-clamp": "^0.4.0",
         "@types/node": "^18.0.1",
         "@vitejs/plugin-vue": "^2.3.3",
         "autoprefixer": "^10.4.7",
