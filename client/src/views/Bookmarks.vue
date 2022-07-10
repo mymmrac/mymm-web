@@ -41,8 +41,13 @@
                     <p class="mt-3">{{ bookmark.name }}</p>
                 </a>
 
-                <i class="bi bi-trash absolute top-2 right-2 hidden group-hover:block m-hover-highlight m-hover-scale"
-                   v-if="authorized" @click.stop="askToDeleteBookmark(bookmark)"></i>
+                <div class="absolute top-2 right-2 flex flex-col">
+                    <i class="bi bi-trash hidden group-hover:block m-hover-highlight m-hover-scale"
+                       v-if="authorized" @click.stop="askToDeleteBookmark(bookmark)"></i>
+
+                    <i class="bi bi-pencil-square hidden group-hover:block m-hover-highlight m-hover-scale"
+                       v-if="authorized" @click.stop="openEditModal(JSON.parse(JSON.stringify(bookmark)))"></i>
+                </div>
 
                 <i class="bi absolute bottom-1 left-2" :class="`bi-${getCategory(bookmark.category).icon}`"></i>
             </div>
@@ -58,7 +63,7 @@
 
                 <label class="block">Category</label>
                 <select v-model="newBookmark.category" class="m-input">
-                    <option v-for="category in categories" :key="category.value" :value="category.value">
+                    <option v-for="category in categories.slice(1)" :key="category.value" :value="category.value">
                         {{ category.name }}
                     </option>
                 </select>
@@ -70,6 +75,35 @@
                 <button class="col-span-2 m-hover-highlight m-hover-scale rounded py-2 m-shadow disabled:text-gray-400"
                         @click.prevent="addBookmark" :disabled="addLoading">
                     {{ addLoading ? "Adding..." : "Add" }}
+                </button>
+            </form>
+        </modal-box>
+
+        <modal-box :shown="showEditModal" @closed="closeEditBookmark" title="Edit Bookmark" close-button>
+            <form class="grid items-center grid-cols-[0.5fr_1fr] p-4 space-y-2">
+                <label class="block">Name</label>
+                <input type="text" class="m-input" v-model="editBookmark.name" placeholder="...">
+
+                <label class="block">Link</label>
+                <input type="text" class="m-input" v-model="editBookmark.link" placeholder="...">
+
+                <label class="block">Category</label>
+                <select v-model="editBookmark.category" class="m-input">
+                    <option v-for="category in categories.slice(1)" :key="category.value" :value="category.value">
+                        {{ category.name }}
+                    </option>
+                </select>
+
+                <label class="block">Icon Link</label>
+                <input type="text" class="m-input" v-model="editBookmark.iconLink" placeholder="...">
+
+                <div class="col-span-2 h-4"></div>
+                <div v-show="editBookmarkError" class="col-span-2 py-2 text-center text-red-500">
+                    {{ editBookmarkError }}
+                </div>
+                <button class="col-span-2 m-hover-highlight m-hover-scale rounded py-2 m-shadow disabled:text-gray-400"
+                        @click.prevent="updateBookmark" :disabled="editLoading">
+                    {{ editLoading ? "Updating..." : "Update" }}
                 </button>
             </form>
         </modal-box>
@@ -184,33 +218,42 @@ let newBookmark: Ref<NewBookmark> = ref({
 let newBookmarkError: Ref<string> = ref("")
 let addLoading = ref(false)
 
+function validateBookmark(name: string, link: string, category: string): string | null {
+    if (name.length < 1) {
+        return "Name can't be empty"
+    }
+
+    if (link.length < 1) {
+        return "Link can't be empty"
+    }
+
+    try {
+        const url = new URL(link)
+        if (!url.hostname) {
+            return "Link is not a valid URL"
+        }
+    } catch (error) {
+        return "Link can't be parsed to URL"
+    }
+
+    if (category.length < 1) {
+        return "Category should be selected"
+    }
+
+    if (!categories.value.find(c => c.value == category)) {
+        return "Category should in list of defined categories"
+    }
+
+    return null
+}
+
 function addBookmark() {
     newBookmarkError.value = ""
     const nb = newBookmark.value
 
-    if (nb.name.length < 1) {
-        newBookmarkError.value = "Name can't be empty"
-        return
-    }
-
-    if (nb.link.length < 1) {
-        newBookmarkError.value = "Link can't be empty"
-        return
-    }
-
-    try {
-        const url = new URL(nb.link)
-        if (!url.hostname) {
-            newBookmarkError.value = "Link is not a valid URL"
-            return
-        }
-    } catch (error) {
-        newBookmarkError.value = "Link can't be parsed to URL"
-        return
-    }
-
-    if (nb.category.length < 1) {
-        newBookmarkError.value = "Category should be selected"
+    const err = validateBookmark(nb.name, nb.link, nb.category)
+    if (err) {
+        newBookmarkError.value = err
         return
     }
 
@@ -230,6 +273,52 @@ function closeNewBookmark() {
     showAddModal.value = false
     newBookmarkError.value = ""
     newBookmark.value = {
+        name: "",
+        link: "",
+        category: "",
+    }
+}
+
+let showEditModal = ref(false)
+let editBookmark: Ref<Bookmark> = ref({
+    id: "",
+    name: "",
+    link: "",
+    category: "",
+})
+let editBookmarkError: Ref<string> = ref("")
+let editLoading = ref(false)
+
+function openEditModal(bookmark: Bookmark) {
+    showEditModal.value = true
+    editBookmark.value = bookmark
+}
+
+function updateBookmark() {
+    const bookmark = editBookmark.value
+    const err = validateBookmark(bookmark.name, bookmark.link, bookmark.category)
+    if (err) {
+        editBookmarkError.value = err
+        return
+    }
+
+    editLoading.value = true
+    bookmarksStore.updateBookmark(bookmark)
+        .then(closeEditBookmark)
+        .catch((error) => {
+            editBookmarkError.value = "Error: " + error
+            return
+        })
+        .finally(() => {
+            editLoading.value = false
+        })
+}
+
+function closeEditBookmark() {
+    showEditModal.value = false
+    editBookmarkError.value = ""
+    editBookmark.value = {
+        id: "",
         name: "",
         link: "",
         category: "",

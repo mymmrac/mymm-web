@@ -35,6 +35,12 @@ export default {
             .then(response => response.data)
     },
 
+    async updateBookmark(bookmark: Bookmark): Promise<void> {
+        return await serverAPI.put("/bookmarks", bookmark, {
+            headers: { "Authorization": authStore.authHeader },
+        })
+    },
+
     async deleteBookmark(bookmarkID: string): Promise<void> {
         return await serverAPI.delete("/bookmarks", {
             headers: { "Authorization": authStore.authHeader },

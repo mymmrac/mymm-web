@@ -1,6 +1,6 @@
 import { defineStore } from "pinia"
 
-import { NewBookmark, Bookmarks } from "@/entity/bookmarks"
+import { NewBookmark, Bookmarks, Bookmark } from "@/entity/bookmarks"
 
 import server from "@/services/server"
 
@@ -25,6 +25,13 @@ export const useBookmarksStore = defineStore("bookmarks", {
             return await server.addBookmark(newBookmark)
                 .then(bookmark => {
                     this.bookmarks.push(bookmark)
+                })
+        },
+
+        async updateBookmark(bookmark: Bookmark): Promise<void> {
+            return await server.updateBookmark(bookmark)
+                .then(() => {
+                    this.bookmarks = this.bookmarks.map(b => b.id !== bookmark.id ? b : bookmark)
                 })
         },
 
