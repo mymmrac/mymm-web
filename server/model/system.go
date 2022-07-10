@@ -54,12 +54,12 @@ type DiskStats struct {
 }
 
 type SystemStats struct {
-	CPU    *CPUStats    `json:"cpu,omitempty"`
-	Load   *LoadStats   `json:"load,omitempty"`
-	RAM    *RAMStats    `json:"ram,omitempty"`
-	Swap   *SwapStats   `json:"swap,omitempty"`
-	Uptime *UptimeStats `json:"uptime,omitempty"`
-	Disk   *DiskStats   `json:"disk,omitempty"`
+	CPU    *CPUStats    `json:"cpu"`
+	Load   *LoadStats   `json:"load"`
+	RAM    *RAMStats    `json:"ram"`
+	Swap   *SwapStats   `json:"swap"`
+	Uptime *UptimeStats `json:"uptime"`
+	Disk   *DiskStats   `json:"disk"`
 }
 
 type System interface {
