@@ -18,5 +18,7 @@ COPY --from=build /bin/mymm /app/mymm
 COPY config.toml /app/config.toml
 COPY users.yml /app/users.yml
 
-ENTRYPOINT ["/app/mymm"]
-CMD ["--config", "/app/config.toml"]
+WORKDIR /app
+
+ENTRYPOINT ["./mymm"]
+CMD ["--config", "config.toml"]

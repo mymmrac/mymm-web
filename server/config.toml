@@ -13,6 +13,6 @@ host = "mongo:27017"
 timeout = "10s"
 
 [settings]
-usersFilename = "users.yml"
+usersFilename = "./users.yml"
 authCacheExpiration = "1m"
 cpuReadDuration = "1s"

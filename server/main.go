@@ -95,7 +95,7 @@ func main() {
 	})
 
 	fmt.Println("Listening...")
-	_ = app.Listen("localhost:"+cfg.Infrastructure.HTTPServer.Port, iris.WithoutInterruptHandler,
+	_ = app.Listen(":"+cfg.Infrastructure.HTTPServer.Port, iris.WithoutInterruptHandler,
 		iris.WithoutServerError(iris.ErrServerClosed))
 	<-idleConnectionsClosed
 
