@@ -2,7 +2,7 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 
-COPY package.json .
+COPY package.json yarn.lock ./
 
 RUN yarn install \
       --prefer-offline \
