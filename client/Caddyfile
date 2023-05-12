@@ -4,4 +4,9 @@
 
 	# Enable the static file server
 	file_server
+
+	# Redirect to index.html
+	handle_path /* {
+        try_files {path} /index.html
+    }
 }

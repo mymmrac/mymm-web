@@ -40,8 +40,7 @@
         <div class="grid m-grid gap-2 relative">
             <div v-for="bookmark in displayedBookmarks" :key="bookmark.id"
                  class="m-box m-item m-hover-scale relative group">
-                <a :href="bookmark.link" :title="bookmark.name" target="_blank"
-                   class="flex flex-col justify-center items-center">
+                <a :href="bookmark.link" :title="bookmark.name" class="flex flex-col justify-center items-center">
                     <img v-if="bookmark.iconLink" :src="bookmark.iconLink" alt="Icon"
                          class="border-0 rounded aspect-square w-1/2">
                     <i v-else class="bi bi-question-square text-7xl"></i>
