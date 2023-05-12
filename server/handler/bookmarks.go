@@ -4,8 +4,8 @@ import (
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 
-	"github.com/mymmrac/mymm.gq/server/common"
-	"github.com/mymmrac/mymm.gq/server/model"
+	"github.com/mymmrac/mymm-web/server/common"
+	"github.com/mymmrac/mymm-web/server/model"
 )
 
 func (h *Handler) bookmarksHandler(ctx *context.Context) {

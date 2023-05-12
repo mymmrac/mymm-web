@@ -14,10 +14,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 
-	"github.com/mymmrac/mymm.gq/server/common"
-	"github.com/mymmrac/mymm.gq/server/config"
-	handlerPkg "github.com/mymmrac/mymm.gq/server/handler"
-	"github.com/mymmrac/mymm.gq/server/logger"
+	"github.com/mymmrac/mymm-web/server/common"
+	"github.com/mymmrac/mymm-web/server/config"
+	handlerPkg "github.com/mymmrac/mymm-web/server/handler"
+	"github.com/mymmrac/mymm-web/server/logger"
 )
 
 var configFile = flag.String("config", "", "Config file")

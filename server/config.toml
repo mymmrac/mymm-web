@@ -9,7 +9,7 @@ corsAllowAll = true
 timeout = "10s"
 
 [infrastructure.mongoDB]
-host = "localhost:27017"
+host = "mongo:27017"
 timeout = "10s"
 
 [settings]

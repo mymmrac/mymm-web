@@ -1,10 +1,9 @@
-module github.com/mymmrac/mymm.gq/server
+module github.com/mymmrac/mymm-web/server
 
-go 1.18
+go 1.20
 
 require (
 	github.com/BurntSushi/toml v1.1.0
-	github.com/google/uuid v1.3.0
 	github.com/iris-contrib/middleware/cors v0.0.0-20220605200020-e50b808c7502
 	github.com/kataras/golog v0.1.7
 	github.com/kataras/iris/v12 v12.2.0-beta3
@@ -25,6 +24,7 @@ require (
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/goccy/go-json v0.9.8 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/iris-contrib/jade v1.1.4 // indirect
 	github.com/iris-contrib/schema v0.0.6 // indirect

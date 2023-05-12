@@ -12,8 +12,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/mymmrac/mymm.gq/server/common"
-	"github.com/mymmrac/mymm.gq/server/logger"
+	"github.com/mymmrac/mymm-web/server/common"
+	"github.com/mymmrac/mymm-web/server/logger"
 )
 
 type ObjectID = primitive.ObjectID

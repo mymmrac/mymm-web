@@ -11,8 +11,8 @@ import (
 	"github.com/shirou/gopsutil/v3/load"
 	"github.com/shirou/gopsutil/v3/mem"
 
-	"github.com/mymmrac/mymm.gq/server/common"
-	"github.com/mymmrac/mymm.gq/server/config"
+	"github.com/mymmrac/mymm-web/server/common"
+	"github.com/mymmrac/mymm-web/server/config"
 )
 
 type CPUStats struct {

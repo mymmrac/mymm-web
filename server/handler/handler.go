@@ -7,10 +7,10 @@ import (
 	"github.com/kataras/iris/v12/context"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/mymmrac/mymm.gq/server/common"
-	"github.com/mymmrac/mymm.gq/server/config"
-	"github.com/mymmrac/mymm.gq/server/logger"
-	"github.com/mymmrac/mymm.gq/server/model"
+	"github.com/mymmrac/mymm-web/server/common"
+	"github.com/mymmrac/mymm-web/server/config"
+	"github.com/mymmrac/mymm-web/server/logger"
+	"github.com/mymmrac/mymm-web/server/model"
 )
 
 type Handler struct {

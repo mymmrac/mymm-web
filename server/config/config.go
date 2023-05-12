@@ -7,7 +7,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 
-	"github.com/mymmrac/mymm.gq/server/logger"
+	"github.com/mymmrac/mymm-web/server/logger"
 )
 
 func LoadConfig(filename string) (Config, error) {
