@@ -1,14 +1,14 @@
 FROM node:20-alpine AS build
 
 WORKDIR /app
+ENV PATH /app/node_modules/.bin:$PATH
 
 COPY package.json yarn.lock ./
 
 RUN yarn install \
       --prefer-offline \
       --frozen-lockfile \
-      --non-interactive \
-      --production
+      --non-interactive
 
 COPY . .
 
