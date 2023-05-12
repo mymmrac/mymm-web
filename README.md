@@ -1,4 +1,3 @@
-# mymm.gq
+# mymm-web
 
 Simple personal website.
-

@@ -4,7 +4,7 @@ import axios from "axios"
 import { Bookmark, NewBookmark, Bookmarks } from "@/entity/bookmarks"
 
 const serverAPI = axios.create({
-    baseURL: process.env.NODE_ENV === "production" ? "https://mymm.gq/api" : "http://localhost:8080",
+    baseURL: process.env.NODE_ENV === "production" ? "https://mymm.pixelbox.dev/api" : "http://localhost:8080",
     withCredentials: false,
     headers: {
         Accept: "application/json",
